@@ -1,5 +1,5 @@
 #########
-# Copyright (c) 2015 GigaSpaces Technologies Ltd. All rights reserved
+# Copyright (c) 2020 Cloudify Platform Ltd. All rights reserved
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -126,12 +126,15 @@ def setup_resources(api):
         'ClusterStatus': 'cluster-status',
         'ManagerClusterStatus': 'cluster-status/manager/<string:node_id>',
         'DBClusterStatus': 'cluster-status/db/<string:node_id>',
-        'BrokerClusterStatus': 'cluster-status/broker/<string:node_id>'
+        'BrokerClusterStatus': 'cluster-status/broker/<string:node_id>',
+        'InterDeploymentDependency':
+            'inter-deployment-dependencies/id',
+        'InterDeploymentDependencies': 'inter-deployment-dependencies'
     }
 
     # Set version endpoint as a non versioned endpoint
     api.add_resource(resources_v1.Version, '/api/version', endpoint='version')
-    for resource, endpoint_suffix in resources_endpoints.iteritems():
+    for resource, endpoint_suffix in resources_endpoints.items():
         _set_versioned_urls(api, resource, endpoint_suffix)
 
 
