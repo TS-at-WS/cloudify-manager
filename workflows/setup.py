@@ -31,6 +31,6 @@ setup(
         'cloudify-common==5.1.0.dev1',
         'retrying==1.3.3',
         'psycopg2==2.7.4',
-        'cryptography==2.1.4',
+        'cryptography==2.3',
     ]
 )
