@@ -55,7 +55,7 @@ This project runs tests on a Cloudify Manager container created by [`docl`](http
 4. Inside a virtualenv, run:
 
    ```
-   $ pip install nose python-dateutil
+   $ pip install nose python-dateutil pytest
    $ pip install -e <SOURCE_ROOT>/cloudify-common
    $ pip install -e <SOURCE_ROOT>/cloudify-cli
    $ pip install -e <SOURCE_ROOT>/cloudify-manager/tests
@@ -109,7 +109,7 @@ To test everything is working as it should, run:
 
 ```
 $ cd <root directory of cloudify-manager repository>
-$ pytest -s tests/integration_tests/tests/agentless_tests/test_workflow.py:BasicWorkflowsTest.test_execute_operation
+$ pytest -s tests/integration_tests/tests/agentless_tests/test_workflow.py::BasicWorkflowsTest::test_execute_operation
 ```
 
 ### Saving the Cloudify Manager's logs
@@ -129,11 +129,11 @@ For example you may want to run this before running the tests:
 export CFY_LOGS_PATH_REMOTE=/tmp/cfy_test_logs/
 export SKIP_LOGS_EXTRACTION=True
 export SKIP_LOG_SAVE_ON_SUCCESS=True
-``` 
+```
 
 _Note: when running with the `itests-runner` you need to also provide a `CFY_LOGS_PATH_LOCAL` env var via:
 `export CFY_LOGS_PATH_LOCAL=<YOUR-LOCAL-PATH>` as the test runs on containers and `CFY_LOGS_PATH_REMOTE` is the path inside the containers.
-This will save the logs on your local storage (where you ran `itests-runner`) at the `CFY_LOGS_PATH_LOCAL` path._ 
+This will save the logs on your local storage (where you ran `itests-runner`) at the `CFY_LOGS_PATH_LOCAL` path._
 ## Using Docl
 * To get an overview of different features supplied by docl, see the README at [`docl`'s](https://github.com/cloudify-cosmo/docl) repo.
 
@@ -143,7 +143,7 @@ This will save the logs on your local storage (where you ran `itests-runner`) at
 
 * Tests running in the integration tests will start and stop containers all the time. If tests are stopped halfway through, it is recommened that you run `docl clean` to remove left over containers. While this is not strictly required, every container is running a full blown manager on your laptop which is quite heavy in terms of resources consumed.
 
-* From time to time, you may want to make small modifications to the manager image. To do so, run `docl run`, then `docl ssh` to make the required changes. Afterwards, run `docl save-image` to override the existing image with your changes. 
+* From time to time, you may want to make small modifications to the manager image. To do so, run `docl run`, then `docl ssh` to make the required changes. Afterwards, run `docl save-image` to override the existing image with your changes.
 
 * All commands that operate on containers accept an optional `--container-id` flag, in case there is need to operate on a different container than the one most recently started. To get the id, run `docker ps` and locate the relevant container.
 
@@ -167,7 +167,7 @@ If you work with `IntelliJ` or `PyCharm` IDE, you can debug the container's rest
       * Set `remote path` to the container's `manager_rest` directory, which is probably:
       `/opt/manager/env/lib/python2.7/site-packages/manager_rest`.
    7. Press OK to save your configuration.
-   
+
 * Define the environment variable `DEBUG_MODE` to be anything you want, as long as it is not empty.
    * If you run the test(s) from your editor, set the environment variable in your test configuration:
    Enter `Run` -> `Edit Configurations` and edit the `Environment Variables` field.  Add a variable named `DEBUG_MODE` and set its value to be any non-empty string.
@@ -185,9 +185,9 @@ If you work with `IntelliJ` or `PyCharm` IDE, you can debug the container's rest
   ```
   unset DEBUG_MODE
   ```
-  
+
   or:
-  
+
   ```
   export DEBUG_MODE=
   ```

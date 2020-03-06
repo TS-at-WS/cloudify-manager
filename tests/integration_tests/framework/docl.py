@@ -164,6 +164,8 @@ def run_manager(label=None, tag=None):
     logger.info(
         'Container details: {0}'.format(container_details)
     )
+    execute('/opt/mgmtworker/env/bin/pip install python-dateutil==2.5.3 '
+            'pytz==2018.4')
     return container_details
 
 

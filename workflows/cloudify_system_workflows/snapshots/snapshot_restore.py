@@ -26,6 +26,7 @@ import tempfile
 import threading
 import subprocess
 from contextlib import closing, contextmanager
+import datetime
 
 import wagon
 from cloudify.workflows import ctx
@@ -73,6 +74,7 @@ from .constants import (
     SECURITY_FILE_LOCATION,
     SECURITY_FILENAME
 )
+from .utils import parse_datetime_string
 
 
 class SnapshotRestore(object):
@@ -110,6 +112,9 @@ class SnapshotRestore(object):
             self._config.snapshot_restore_threads)
 
     def restore(self):
+
+        # import web_pdb; web_pdb.set_trace(host='0.0.0.0')
+
         self._mark_manager_restoring()
         self._tempdir = tempfile.mkdtemp('-snapshot-data')
         snapshot_path = self._get_snapshot_path()
@@ -145,6 +150,7 @@ class SnapshotRestore(object):
                 self._restore_agents()
                 self._restore_amqp_vhosts_and_users()
                 self._restore_deployment_envs(postgres)
+                self._restore_scheduled_executions(postgres)
 
                 if self._premium_enabled:
                     self._reconfigure_status_reporter(postgres)
@@ -933,6 +939,34 @@ class SnapshotRestore(object):
             '--user_id',
             str(user_id),
         ]).aggr_stdout.strip()
+
+    def _restore_scheduled_executions(self, postgres):
+        """
+        Restore executions scheduled for a time after a snapshot creation.
+        """
+        ctx.logger.debug("MATEUSZ _restore_scheduled_tasks: "
+                         "postgres {}".format(postgres))
+        for execution in self._client.executions.list(_get_all_results=True):
+            if execution.status in Execution.SCHEDULED:
+                if self._execution_scheduled_for_later(execution):
+                    ctx.logger.info("Restoring execution {} (at {})".format(
+                        execution.workflow_id, execution.scheduled_for))
+                    ctx.logger.info("  will be SCHEDULED for later")
+                else:
+                    self._client.executions.update(execution.id,
+                                                   Execution.FAILED)
+                    ctx.logger.info("Execution {} scheduled for {} is "
+                                    "overdue.  Marking as FAILED.".format(
+                                        execution.id, execution.scheduled_for))
+            else:
+                ctx.logger.info("Not restoring {} execution ({})".format(
+                    execution.workflow_id, execution.status))
+
+    @staticmethod
+    def _execution_scheduled_for_later(execution):
+        scheduled_for = parse_datetime_string(execution.scheduled_for)
+        return datetime.datetime.now(tz=None) < scheduled_for
+
 
     @staticmethod
     def _mark_manager_restoring():

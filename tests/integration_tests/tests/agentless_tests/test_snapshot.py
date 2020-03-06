@@ -494,3 +494,33 @@ class TestSnapshot(AgentlessTestCase):
             securityconf=self.REST_SEC_CONFIG_PATH,
         ))
         self.restart_service('cloudify-restservice')
+
+    def test_restore_snapshot_scheduled_tasks(self):
+        """
+        Validate workflow restoration from snapshot.
+
+        This test uses a file with four scheduled transactions:
+          - uninstall  at 2020-03-08 12:00:00+00:00
+          - install    at 2020-03-09 12:00:00+00:00
+          - uninstall  at 2020-03-10 12:00:00+00:00
+          - install    at 2020-03-11 12:00:00+00:00
+        Test requires mocking system time.
+        """
+        SNAPSHOTS_DIR = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
+            'resources', 'snapshots')
+        snapshot_path = os.path.join(SNAPSHOTS_DIR,
+                                     'snap_with_scheduled_execs_20200306.zip')
+        self._upload_and_restore_snapshot(snapshot_path)
+
+        execs = postgresql.run_query(
+            "SELECT id, scheduled_for "
+            "FROM executions "
+            "WHERE blueprint_id='bp_mock' AND status='scheduled';")
+        self.assertEqual(execs['status'], 'ok')
+        self.assertEqual(len(execs['all']), 4)
+
+        # execs = postgresql.run_query("SELECT is_external, node_id "
+        #                                "FROM executions;")['all']
+        # self.assertFalse(brokers[0][0])
+        # self.assertGreater(len(brokers[0][1]), 1)
